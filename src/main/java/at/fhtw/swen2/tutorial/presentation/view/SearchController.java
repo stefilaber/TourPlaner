@@ -24,11 +24,10 @@ import java.util.stream.Collectors;
 //@Scope("prototype")
 @Slf4j
 public class SearchController {
+    public static final int PAGE_ITEMS_COUNT = 10;
 
     @Autowired
-    private PersonService personService;
-
-    public static final int PAGE_ITEMS_COUNT = 10;
+    private PersonListController personListController;
 
     @FXML
     private TextField searchField;
@@ -36,13 +35,6 @@ public class SearchController {
     private Button searchButton;
     @FXML
     private Label searchLabel;
-    @FXML
-    private TableView tableView = new TableView<>();
-    @FXML
-    private VBox dataContainer;
-
-    @Autowired
-    private PersonListViewModel personListViewModel;
 
     //private ObservableList<NewPersonViewModel> masterData = FXCollections.observableArrayList();
     //private ObservableList<NewPersonViewModel> results = FXCollections.observableList(masterData);
@@ -54,9 +46,9 @@ public class SearchController {
 
     @FXML
     private void initialize() {
-
         // search panel
         searchButton.setText("Search");
+
         searchButton.setOnAction(event -> loadData());
         searchButton.setStyle("-fx-background-color: slateblue; -fx-text-fill: white;");
 
@@ -69,58 +61,12 @@ public class SearchController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             searchLabel.setText(newValue);
         });
-
-        initTable();
-
-
-    }
-
-    private void initTable() {
-        personService.getPersonList().forEach(p -> {
-            personListViewModel.addItem(p);
-        });
-        tableView.setItems(personListViewModel.getPersonListItems());
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn id = new TableColumn("ID");
-        id.setCellValueFactory(new PropertyValueFactory("id"));
-        TableColumn name = new TableColumn("NAME");
-        name.setCellValueFactory(new PropertyValueFactory("name"));
-        TableColumn employed = new TableColumn("EMPLOYED");
-        employed.setCellValueFactory(new PropertyValueFactory("isEmployed"));
-        tableView.getColumns().addAll(id, name, employed);
-
-        dataContainer.getChildren().add(tableView);
-    }
-
-    public void addPerson(Person person) {
-        //masterData.add(new NewPersonViewModel(person));
-        //tableView.refresh();
     }
 
     private void loadData() {
         String searchText = searchField.getText();
-/*
-        Task<ObservableList<NewPersonViewModel>> task = new Task<>() {
-            @Override
-            protected ObservableList<NewPersonViewModel> call() throws Exception {
-                updateMessage("Loading data");
-                return FXCollections.observableArrayList(masterData
-                        .stream()
-                        .filter(value -> value.getName().toLowerCase().contains(searchText))
-                        .collect(Collectors.toList()));
-            }
-        };
 
-        task.setOnSucceeded(event -> {
-            results = task.getValue();
-            tableView.setItems(FXCollections.observableList(results));
-        });
-
-        Thread th = new Thread(task);
-        th.setDaemon(true);
-        th.start();
-*/
+        personListController.filterList(searchText);
     }
 
 }
